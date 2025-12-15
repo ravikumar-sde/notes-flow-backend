@@ -1,70 +1,21 @@
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
 const config = require('./config');
-const db = require('./db');
-const { getRedisClient } = require('./redisClient');
-const { publish } = require('./natsClient');
-const authMiddleware = require('./authMiddleware');
-
-const { createUserRepository, createUserCache } = require('./data-access');
-const {
-  createRegisterUser,
-  createLoginUser,
-  createGetCurrentUser,
-} = require('./use-cases');
-const { createAuthController } = require('./controllers');
-const { createAuthPresenter } = require('./presenters');
-const { createServer } = require('./server');
-
-function buildContainer() {
-  const redis = getRedisClient();
-
-  const userRepository = createUserRepository({ dbClient: db });
-  const userCache = createUserCache({
-    redis,
-    ttlSeconds: config.userCacheTtlSeconds,
-  });
-
-  const eventPublisher = {
-    publish: (subject, data) => publish(subject, data),
-  };
-
-  const registerUser = createRegisterUser({
-    userRepository,
-    userCache,
-    eventPublisher,
-    config,
-  });
-
-  const loginUser = createLoginUser({
-    userRepository,
-    userCache,
-    config,
-  });
-
-  const getCurrentUser = createGetCurrentUser({
-    userRepository,
-    userCache,
-  });
-
-  const authPresenter = createAuthPresenter();
-
-  const authController = createAuthController({
-    registerUser,
-    loginUser,
-    getCurrentUser,
-    authPresenter,
-  });
-
-  const app = createServer({
-    authController,
-    authMiddleware,
-    config,
-  });
-
-  return { app };
-}
+const authRoutes = require('./authRoutes');
 
 async function start() {
-  const { app } = buildContainer();
+  const app = express();
+
+  app.use(cors());
+  app.use(express.json());
+  app.use(morgan('dev'));
+
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'auth-service' });
+  });
+
+  app.use('/auth', authRoutes);
 
   app.listen(config.port, () => {
     console.log(`Auth service listening on port ${config.port}`);
@@ -76,4 +27,3 @@ start().catch((err) => {
   process.exit(1);
 });
 
-module.exports = { buildContainer };

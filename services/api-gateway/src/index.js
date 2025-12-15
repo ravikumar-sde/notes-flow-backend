@@ -1,69 +1,33 @@
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
 const config = require('./config');
-const { createClient } = require('./httpClient');
-const authMiddleware = require('./authMiddleware');
+const authRoutes = require('./authRoutes');
+const workspaceRoutes = require('./workspaceRoutes');
 
-const { createAuthApi, createWorkspaceApi } = require('./data-access');
-const {
-  createRegisterUserUseCase,
-  createLoginUserUseCase,
-  createGetCurrentUserUseCase,
-  createCreateWorkspaceUseCase,
-  createListWorkspacesUseCase,
-} = require('./use-cases');
-const { createAuthController, createWorkspaceController } = require('./controllers');
-const { createAuthPresenter, createWorkspacePresenter } = require('./presenters');
-const { createServer } = require('./server');
+function start() {
+  const app = express();
 
-function buildContainer() {
-	const authClient = createClient(config.authServiceUrl);
-	const workspaceClient = createClient(config.workspaceServiceUrl);
+  app.use(
+    cors({
+      origin: config.corsOrigin === '*' ? undefined : config.corsOrigin,
+      credentials: true,
+    })
+  );
+  app.use(express.json());
+  app.use(morgan('dev'));
 
-	const authApi = createAuthApi({ httpClient: authClient });
-	const workspaceApi = createWorkspaceApi({ httpClient: workspaceClient });
+  app.get('/api/v1/health', (req, res) => {
+    res.json({ status: 'ok', service: 'api-gateway' });
+  });
 
-		const registerUser = createRegisterUserUseCase({ authApi });
-		const loginUser = createLoginUserUseCase({ authApi });
-		const getCurrentUser = createGetCurrentUserUseCase({ authApi });
-	
-		const createWorkspace = createCreateWorkspaceUseCase({ workspaceApi });
-		const listWorkspaces = createListWorkspacesUseCase({ workspaceApi });
-
-		const authPresenter = createAuthPresenter();
-		const workspacePresenter = createWorkspacePresenter();
-	
-		const authController = createAuthController({
-			registerUser,
-			loginUser,
-			getCurrentUser,
-			authPresenter,
-		});
-		const workspaceController = createWorkspaceController({
-			createWorkspace,
-			listWorkspaces,
-			workspacePresenter,
-		});
-	
-		const app = createServer({
-			config,
-			authController,
-			workspaceController,
-			authMiddleware,
-		});
-
-  return { app };
-}
-
-async function start() {
-  const { app } = buildContainer();
+  app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/workspaces', workspaceRoutes);
 
   app.listen(config.port, () => {
     console.log(`API gateway listening on port ${config.port}`);
   });
 }
 
-start().catch((err) => {
-  console.error('Failed to start API gateway', err);
-  process.exit(1);
-});
+start();
 
-module.exports = { buildContainer };
