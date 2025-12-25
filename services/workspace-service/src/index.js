@@ -7,7 +7,12 @@ const workspaceRoutes = require('./workspaceRoutes');
 async function start() {
   const app = express();
 
-  app.use(cors());
+  app.use(
+    cors({
+      origin: config.corsOrigin === '*' ? true : config.corsOrigin,
+      credentials: true,
+    })
+  );
   app.use(express.json());
   app.use(morgan('dev'));
 

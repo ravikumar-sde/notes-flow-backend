@@ -10,6 +10,7 @@ const config = {
   workspaceCacheTtlSeconds: Number(
     process.env.WORKSPACE_CACHE_TTL_SECONDS || 600
   ),
+  corsOrigin: process.env.CORS_ORIGIN || '*',
 };
 
 module.exports = config;

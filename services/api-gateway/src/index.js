@@ -8,12 +8,22 @@ const workspaceRoutes = require('./workspaceRoutes');
 function start() {
   const app = express();
 
-  app.use(
-    cors({
-      origin: config.corsOrigin === '*' ? true : config.corsOrigin,
-      credentials: true,
-    })
-  );
+  // CORS configuration
+  const corsOptions = {
+    origin: config.corsOrigin === '*' ? true : config.corsOrigin,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400, // 24 hours
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  };
+
+  // Enable pre-flight across-the-board (must be before other routes)
+  app.options('*', cors(corsOptions));
+
+  app.use(cors(corsOptions));
   app.use(express.json());
   app.use(morgan('dev'));
 

@@ -11,6 +11,7 @@ const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1h',
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
   userCacheTtlSeconds: Number(process.env.USER_CACHE_TTL_SECONDS || 3600),
+  corsOrigin: process.env.CORS_ORIGIN || '*',
 };
 
 module.exports = config;

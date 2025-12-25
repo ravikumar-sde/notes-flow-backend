@@ -45,6 +45,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       NATS_URL: nats://nats:4222
       JWT_SECRET: dev_jwt_secret_change_me
+      CORS_ORIGIN: "*"
     depends_on:
       - db
       - redis
@@ -63,6 +64,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       NATS_URL: nats://nats:4222
       WORKSPACE_CACHE_TTL_SECONDS: 600
+      CORS_ORIGIN: "*"
     depends_on:
       - db
       - redis
