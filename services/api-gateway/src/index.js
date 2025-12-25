@@ -10,7 +10,7 @@ function start() {
 
   app.use(
     cors({
-      origin: config.corsOrigin === '*' ? undefined : config.corsOrigin,
+      origin: config.corsOrigin === '*' ? true : config.corsOrigin,
       credentials: true,
     })
   );
