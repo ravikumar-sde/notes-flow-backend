@@ -15,6 +15,7 @@ services:
       - db-data:/var/lib/postgresql/data
       - ./db/auth-service.sql:/docker-entrypoint-initdb.d/01-auth-service.sql:ro
       - ./db/workspace-service.sql:/docker-entrypoint-initdb.d/02-workspace-service.sql:ro
+      - ./db/page-service.sql:/docker-entrypoint-initdb.d/03-page-service.sql:ro
 
   redis:
     image: redis:7
@@ -72,6 +73,25 @@ services:
     ports:
       - "4002:4002"
 
+  page-service:
+    build: ./services/page-service
+    container_name: notesflow_page_service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 4003
+      DATABASE_URL: postgres://notesflow:notesflow@db:5432/notesflow
+      REDIS_URL: redis://redis:6379/0
+      NATS_URL: nats://nats:4222
+      PAGE_CACHE_TTL_SECONDS: 600
+      CORS_ORIGIN: "*"
+    depends_on:
+      - db
+      - redis
+      - nats
+    ports:
+      - "4003:4003"
+
   api-gateway:
     build: ./services/api-gateway
     container_name: notesflow_api_gateway
@@ -81,11 +101,13 @@ services:
       PORT: 4000
       AUTH_SERVICE_URL: http://auth-service:4001
       WORKSPACE_SERVICE_URL: http://workspace-service:4002
+      PAGE_SERVICE_URL: http://page-service:4003
       JWT_SECRET: dev_jwt_secret_change_me
       CORS_ORIGIN: "*"
     depends_on:
       - auth-service
       - workspace-service
+      - page-service
     ports:
       - "4000:4000"
 

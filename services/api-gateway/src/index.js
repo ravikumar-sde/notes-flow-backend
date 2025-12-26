@@ -4,6 +4,8 @@ const morgan = require('morgan');
 const config = require('./config');
 const authRoutes = require('./authRoutes');
 const workspaceRoutes = require('./workspaceRoutes');
+const pageRoutes = require('./pageRoutes');
+const workspacePageRoutes = require('./workspacePageRoutes');
 
 function start() {
   const app = express();
@@ -32,7 +34,9 @@ function start() {
   });
 
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/workspaces/:workspaceId/pages', workspacePageRoutes);
   app.use('/api/v1/workspaces', workspaceRoutes);
+  app.use('/api/v1/pages', pageRoutes);
 
   app.listen(config.port, () => {
     console.log(`API gateway listening on port ${config.port}`);

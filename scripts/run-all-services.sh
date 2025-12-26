@@ -15,6 +15,7 @@ start_service() {
 
 start_service "auth-service (port 4001)" "services/auth-service"
 start_service "workspace-service (port 4002)" "services/workspace-service"
+start_service "page-service (port 4003)" "services/page-service"
 start_service "api-gateway (port 4000)" "services/api-gateway"
 
 echo "All services started. Press Ctrl+C to stop."

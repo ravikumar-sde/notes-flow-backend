@@ -5,7 +5,10 @@
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:4000", "type": "string" },
-    { "key": "authToken", "value": "", "type": "string" }
+    { "key": "authToken", "value": "", "type": "string" },
+    { "key": "workspaceId", "value": "", "type": "string" },
+    { "key": "pageId", "value": "", "type": "string" },
+    { "key": "childPageId", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -117,7 +120,25 @@
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "workspaces"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  try {",
+                  "    const data = pm.response.json();",
+                  "    if (data.id) {",
+                  "      pm.collectionVariables.set('workspaceId', data.id);",
+                  "    }",
+                  "  } catch (e) { }",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "List Workspaces",
@@ -130,6 +151,302 @@
               "raw": "{{baseUrl}}/api/v1/workspaces",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "workspaces"]
+            }
+          }
+        },
+        {
+          "name": "Get Workspace by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Workspace (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Workspace Name\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Workspace (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Partially Updated Name\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pages",
+      "item": [
+        {
+          "name": "Create Root Page",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspace_id\": \"{{workspaceId}}\",\n  \"title\": \"My First Page\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  try {",
+                  "    const data = pm.response.json();",
+                  "    if (data.page && data.page.id) {",
+                  "      pm.collectionVariables.set('pageId', data.page.id);",
+                  "    }",
+                  "  } catch (e) { }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Child Page",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspace_id\": \"{{workspaceId}}\",\n  \"parent_page_id\": \"{{pageId}}\",\n  \"title\": \"Child Page\",\n  \"icon\": \"📝\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is a child page nested under the parent.\",\n        \"properties\": {}\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  try {",
+                  "    const data = pm.response.json();",
+                  "    if (data.page && data.page.id) {",
+                  "      pm.collectionVariables.set('childPageId', data.page.id);",
+                  "    }",
+                  "  } catch (e) { }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Page by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Child Pages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}/children",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}", "children"]
+            }
+          }
+        },
+        {
+          "name": "Get Workspace Pages (Tree)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}/pages",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "workspaces", "{{workspaceId}}", "pages"]
+            }
+          }
+        },
+        {
+          "name": "Update Page (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Page Title\",\n  \"icon\": \"✨\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Updated Heading\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This content has been updated!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"code\",\n        \"content\": \"console.log('Hello, NotesFlow!');\",\n        \"properties\": {\n          \"language\": \"javascript\"\n        }\n      }\n    ]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Page (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Partially Updated Title\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}"]
+            }
+          }
+        },
+        {
+          "name": "Move Page",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parent_page_id\": null,\n  \"position\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{childPageId}}/move",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{childPageId}}", "move"]
+            }
+          }
+        },
+        {
+          "name": "Archive Page",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_archived\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Unarchive Page",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_archived\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}", "archive"]
+            }
+          }
+        },
+        {
+          "name": "Delete Page",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "pages", "{{pageId}}"]
             }
           }
         }

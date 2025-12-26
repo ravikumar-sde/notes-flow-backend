@@ -1,0 +1,27 @@
+{
+  "name": "page-service",
+  "version": "1.0.0",
+  "description": "Page service for NotesFlow - handles page creation and management",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "NODE_ENV=development node src/index.js",
+    "migrate": "node src/database/migrate.js",
+    "test": "echo \"No tests yet for page-service\" && exit 0"
+  },
+  "keywords": ["notesflow", "pages", "microservice"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.22.1",
+    "ioredis": "^5.8.2",
+    "morgan": "^1.10.1",
+    "nats": "^2.29.3",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.5",
+    "umzug": "^3.8.1"
+  }
+}
+
