@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const config = require('./config');
-const workspaceRoutes = require('./workspaceRoutes');
+const { workspaceRoutes } = require('./routes');
 
 async function start() {
   const app = express();
