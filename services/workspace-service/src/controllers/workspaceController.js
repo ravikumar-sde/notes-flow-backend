@@ -92,8 +92,8 @@ function createWorkspaceController(dataAccess, services, businessLogic) {
 
       const { role, slug: currentSlug } = membership;
 
-      if (role !== 'owner' && role !== 'admin') {
-        return res.status(403).json({ message: 'Only workspace owners and admins can update workspaces' });
+      if (!businessLogic.canEditSettings(role)) {
+        return res.status(403).json({ message: 'You do not have permission to update workspace settings' });
       }
 
       // Generate new slug if name changed
@@ -139,8 +139,9 @@ function createWorkspaceController(dataAccess, services, businessLogic) {
         return res.status(404).json({ message: 'Workspace not found' });
       }
 
+      // Only the owner can delete the workspace
       if (ownerData.owner_id !== userId) {
-        return res.status(403).json({ message: 'Only workspace owner can delete the workspace' });
+        return res.status(403).json({ message: 'Only the workspace owner can delete the workspace' });
       }
 
       // Get all members before deletion for cache invalidation

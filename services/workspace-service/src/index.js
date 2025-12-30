@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const config = require('./config');
-const { workspaceRoutes } = require('./routes');
+const { workspaceRoutes, invitationRoutes, publicInvitationRoutes } = require('./routes');
 
 async function start() {
   const app = express();
@@ -20,6 +20,13 @@ async function start() {
     res.json({ status: 'ok', service: 'workspace-service' });
   });
 
+  // Public invitation routes (no workspace prefix)
+  app.use('/invitations', publicInvitationRoutes);
+
+  // Workspace-specific invitation routes
+  app.use('/workspaces/:workspaceId/invitations', invitationRoutes);
+
+  // Workspace routes
   app.use('/workspaces', workspaceRoutes);
 
   app.listen(config.port, () => {
