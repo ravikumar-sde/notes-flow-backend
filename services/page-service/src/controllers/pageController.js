@@ -1,73 +1,15 @@
 function createPageController(dataAccess, services, businessLogic) {
-  async function createPage(req, res) {
-    const userId = req.headers['x-user-id'];
-    const { workspace_id, parent_page_id, title, content, icon, cover_image } = req.body || {};
-
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
-    }
-
-    if (!workspace_id) {
-      return res.status(400).json({ message: 'workspace_id is required' });
-    }
-
-    try {
-      // Check if user has access to the workspace
-      const membership = await dataAccess.checkUserWorkspaceAccess(workspace_id, userId);
-      if (!membership) {
-        return res.status(403).json({ message: 'Access denied to this workspace' });
-      }
-
-      // If parent_page_id is provided, verify it exists and belongs to the same workspace
-      if (parent_page_id) {
-        const parentPage = await dataAccess.getPageById(parent_page_id);
-        if (!parentPage) {
-          return res.status(404).json({ message: 'Parent page not found' });
-        }
-        if (parentPage.workspace_id !== workspace_id) {
-          return res.status(400).json({ message: 'Parent page does not belong to this workspace' });
-        }
-      }
-
-      // Calculate position for the new page
-      const position = await businessLogic.calculateNewPosition(workspace_id, parent_page_id || null);
-
-      // Create the page
-      const page = await dataAccess.createPage(
-        workspace_id,
-        parent_page_id || null,
-        title || 'Untitled',
-        content || { blocks: [] },
-        icon || null,
-        cover_image || null,
-        userId
-      );
-
-      // Update position
-      await dataAccess.movePage(page.id, parent_page_id || null, position, userId);
-
-      // Invalidate caches
-      await services.invalidateWorkspaceCache(workspace_id);
-      if (parent_page_id) {
-        await services.invalidateChildPagesCache(parent_page_id);
-      }
-
-      // Publish event
-      await services.publishPageCreated(page);
-
-      return res.status(201).json({ page });
-    } catch (err) {
-      console.error('Error creating page', err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-  }
-
   async function getPageById(req, res) {
     const userId = req.headers['x-user-id'];
+    const workspaceId = req.params.workspaceId;
     const { id } = req.params;
 
     if (!userId) {
       return res.status(401).json({ message: 'Missing x-user-id header' });
+    }
+
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspace_id is required' });
     }
 
     if (!id) {
@@ -75,14 +17,20 @@ function createPageController(dataAccess, services, businessLogic) {
     }
 
     try {
+      // Check if user has access to the workspace
+      const membership = await dataAccess.checkUserWorkspaceAccess(workspaceId, userId);
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Check cache first
       const cached = await services.getCachedPage(id);
       if (cached) {
-        // Still need to verify user has access
-        const membership = await dataAccess.checkUserWorkspaceAccess(cached.workspace_id, userId);
-        if (membership) {
-          return res.json({ page: cached, source: 'cache' });
+        // Verify the page belongs to the specified workspace
+        if (cached.workspace_id !== workspaceId) {
+          return res.status(400).json({ message: 'Page does not belong to this workspace' });
         }
+        return res.json({ page: cached, source: 'cache' });
       }
 
       // Get page with permission check
@@ -90,6 +38,11 @@ function createPageController(dataAccess, services, businessLogic) {
 
       if (!page) {
         return res.status(404).json({ message: 'Page not found or access denied' });
+      }
+
+      // Verify the page belongs to the specified workspace
+      if (page.workspace_id !== workspaceId) {
+        return res.status(400).json({ message: 'Page does not belong to this workspace' });
       }
 
       // Cache the page
@@ -143,7 +96,6 @@ function createPageController(dataAccess, services, businessLogic) {
     }
   }
 
-  // Helper function to build page tree
   function buildPageTree(pages) {
     const pageMap = new Map();
     const rootPages = [];
@@ -171,10 +123,14 @@ function createPageController(dataAccess, services, businessLogic) {
 
   async function getChildPages(req, res) {
     const userId = req.headers['x-user-id'];
-    const { id } = req.params;
+    const { id, workspaceId } = req.params;
 
     if (!userId) {
       return res.status(401).json({ message: 'Missing x-user-id header' });
+    }
+
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspace_id is required' });
     }
 
     if (!id) {
@@ -182,10 +138,21 @@ function createPageController(dataAccess, services, businessLogic) {
     }
 
     try {
+      // Check if user has access to the workspace
+      const membership = await dataAccess.checkUserWorkspaceAccess(workspaceId, userId);
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Verify user has access to the parent page
       const page = await dataAccess.getPageWithPermissions(id, userId);
       if (!page) {
         return res.status(404).json({ message: 'Page not found or access denied' });
+      }
+
+      // Verify the page belongs to the specified workspace
+      if (page.workspace_id !== workspaceId) {
+        return res.status(400).json({ message: 'Page does not belong to this workspace' });
       }
 
       // Check cache first
@@ -209,6 +176,7 @@ function createPageController(dataAccess, services, businessLogic) {
 
   async function updatePage(req, res) {
     const userId = req.headers['x-user-id'];
+    const workspaceId = req.params.workspaceId;
     const { id } = req.params;
     const { title, content, icon, cover_image } = req.body || {};
 
@@ -216,21 +184,35 @@ function createPageController(dataAccess, services, businessLogic) {
       return res.status(401).json({ message: 'Missing x-user-id header' });
     }
 
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspace_id is required' });
+    }
+
     if (!id) {
       return res.status(400).json({ message: 'Page ID is required' });
     }
 
     try {
+      // Check if user has access to the workspace
+      const membership = await dataAccess.checkUserWorkspaceAccess(workspaceId, userId);
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Verify user has access to the page
       const existingPage = await dataAccess.getPageWithPermissions(id, userId);
       if (!existingPage) {
         return res.status(404).json({ message: 'Page not found or access denied' });
       }
 
-      // Check if user has permission to edit (member or higher)
-      const role = existingPage.role;
-      if (role === 'viewer') {
-        return res.status(403).json({ message: 'Viewers cannot edit pages' });
+      // Verify the page belongs to the specified workspace
+      if (existingPage.workspace_id !== workspaceId) {
+        return res.status(400).json({ message: 'Page does not belong to this workspace' });
+      }
+
+      // Check if user has permission to edit
+      if (!businessLogic.canEdit(existingPage.role)) {
+        return res.status(403).json({ message: 'You do not have permission to edit pages' });
       }
 
       // Build updates object
@@ -258,6 +240,7 @@ function createPageController(dataAccess, services, businessLogic) {
 
   async function movePage(req, res) {
     const userId = req.headers['x-user-id'];
+    const workspaceId = req.params.workspaceId;
     const { id } = req.params;
     const { parent_page_id, position } = req.body || {};
 
@@ -265,21 +248,35 @@ function createPageController(dataAccess, services, businessLogic) {
       return res.status(401).json({ message: 'Missing x-user-id header' });
     }
 
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspace_id is required' });
+    }
+
     if (!id) {
       return res.status(400).json({ message: 'Page ID is required' });
     }
 
     try {
+      // Check if user has access to the workspace
+      const membership = await dataAccess.checkUserWorkspaceAccess(workspaceId, userId);
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Verify user has access to the page
       const existingPage = await dataAccess.getPageWithPermissions(id, userId);
       if (!existingPage) {
         return res.status(404).json({ message: 'Page not found or access denied' });
       }
 
-      // Check if user has permission to move (member or higher)
-      const role = existingPage.role;
-      if (role === 'viewer') {
-        return res.status(403).json({ message: 'Viewers cannot move pages' });
+      // Verify the page belongs to the specified workspace
+      if (existingPage.workspace_id !== workspaceId) {
+        return res.status(400).json({ message: 'Page does not belong to this workspace' });
+      }
+
+      // Check if user has permission to move pages
+      if (!businessLogic.canMove(existingPage.role)) {
+        return res.status(403).json({ message: 'You do not have permission to move pages' });
       }
 
       const oldParentId = existingPage.parent_page_id;
@@ -290,7 +287,7 @@ function createPageController(dataAccess, services, businessLogic) {
         if (!newParent) {
           return res.status(404).json({ message: 'New parent page not found' });
         }
-        if (newParent.workspace_id !== existingPage.workspace_id) {
+        if (newParent.workspace_id !== workspaceId) {
           return res.status(400).json({ message: 'Cannot move page to different workspace' });
         }
       }
@@ -298,7 +295,7 @@ function createPageController(dataAccess, services, businessLogic) {
       // Calculate new position if not provided
       const newPosition = position !== undefined
         ? position
-        : await businessLogic.calculateNewPosition(existingPage.workspace_id, parent_page_id || null);
+        : await businessLogic.calculateNewPosition(workspaceId, parent_page_id || null);
 
       // Move the page
       const page = await dataAccess.movePage(id, parent_page_id || null, newPosition, userId);
@@ -324,11 +321,16 @@ function createPageController(dataAccess, services, businessLogic) {
 
   async function archivePage(req, res) {
     const userId = req.headers['x-user-id'];
+    const workspaceId = req.params.workspaceId;
     const { id } = req.params;
     const { is_archived } = req.body || {};
 
     if (!userId) {
       return res.status(401).json({ message: 'Missing x-user-id header' });
+    }
+
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspace_id is required' });
     }
 
     if (!id) {
@@ -340,16 +342,26 @@ function createPageController(dataAccess, services, businessLogic) {
     }
 
     try {
+      // Check if user has access to the workspace
+      const membership = await dataAccess.checkUserWorkspaceAccess(workspaceId, userId);
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Verify user has access to the page
       const existingPage = await dataAccess.getPageWithPermissions(id, userId);
       if (!existingPage) {
         return res.status(404).json({ message: 'Page not found or access denied' });
       }
 
-      // Check if user has permission to archive (admin or owner)
-      const role = existingPage.role;
-      if (role !== 'owner' && role !== 'admin') {
-        return res.status(403).json({ message: 'Only owners and admins can archive pages' });
+      // Verify the page belongs to the specified workspace
+      if (existingPage.workspace_id !== workspaceId) {
+        return res.status(400).json({ message: 'Page does not belong to this workspace' });
+      }
+
+      // Check if user has permission to archive
+      if (!businessLogic.canArchive(existingPage.role)) {
+        return res.status(403).json({ message: 'You do not have permission to archive pages' });
       }
 
       // Archive the page
@@ -370,10 +382,15 @@ function createPageController(dataAccess, services, businessLogic) {
 
   async function deletePage(req, res) {
     const userId = req.headers['x-user-id'];
+    const workspaceId = req.params.workspaceId;
     const { id } = req.params;
 
     if (!userId) {
       return res.status(401).json({ message: 'Missing x-user-id header' });
+    }
+
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspace_id is required' });
     }
 
     if (!id) {
@@ -381,19 +398,28 @@ function createPageController(dataAccess, services, businessLogic) {
     }
 
     try {
+      // Check if user has access to the workspace
+      const membership = await dataAccess.checkUserWorkspaceAccess(workspaceId, userId);
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied to this workspace' });
+      }
+
       // Verify user has access to the page
       const existingPage = await dataAccess.getPageWithPermissions(id, userId);
       if (!existingPage) {
         return res.status(404).json({ message: 'Page not found or access denied' });
       }
 
-      // Check if user has permission to delete (owner only)
-      const role = existingPage.role;
-      if (role !== 'owner') {
-        return res.status(403).json({ message: 'Only workspace owners can permanently delete pages' });
+      // Verify the page belongs to the specified workspace
+      if (existingPage.workspace_id !== workspaceId) {
+        return res.status(400).json({ message: 'Page does not belong to this workspace' });
       }
 
-      const workspaceId = existingPage.workspace_id;
+      // Check if user has permission to delete
+      if (!businessLogic.canDelete(existingPage.role)) {
+        return res.status(403).json({ message: 'You do not have permission to delete pages' });
+      }
+
       const parentPageId = existingPage.parent_page_id;
 
       // Delete the page

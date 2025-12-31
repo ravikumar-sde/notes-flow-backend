@@ -3,9 +3,13 @@ const services = require('../services');
 const businessLogic = require('../business-logic');
 const createPageController = require('./pageController');
 
+const makeCreatePage = require('./createPage');
+const createPage = makeCreatePage({ dataAccess, services, businessLogic });
+
 const pageController = createPageController(dataAccess, services, businessLogic);
 
 module.exports = {
   ...pageController,
+  createPage,
 };
 

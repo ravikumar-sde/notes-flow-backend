@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const config = require('./config');
-const { pageRoutes, workspacePageRoutes } = require('./routes');
+const { workspacePageRoutes } = require('./routes');
 
 async function start() {
   const app = express();
@@ -20,10 +20,7 @@ async function start() {
     res.json({ status: 'ok', service: 'page-service' });
   });
 
-  // Page routes
-  app.use('/pages', pageRoutes);
-  
-  // Workspace pages routes
+  // Workspace pages routes (all page operations are workspace-scoped)
   app.use('/workspaces/:workspaceId/pages', workspacePageRoutes);
 
   app.listen(config.port, () => {

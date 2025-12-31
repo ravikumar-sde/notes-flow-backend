@@ -4,8 +4,9 @@ const morgan = require('morgan');
 const config = require('./config');
 const authRoutes = require('./authRoutes');
 const workspaceRoutes = require('./workspaceRoutes');
-const pageRoutes = require('./pageRoutes');
 const workspacePageRoutes = require('./workspacePageRoutes');
+const invitationRoutes = require('./invitationRoutes');
+const publicInvitationRoutes = require('./publicInvitationRoutes');
 
 function start() {
   const app = express();
@@ -34,9 +35,16 @@ function start() {
   });
 
   app.use('/api/v1/auth', authRoutes);
+
+  // Public invitation routes (no auth required for preview)
+  app.use('/api/v1/invitations', publicInvitationRoutes);
+
+  // Workspace-specific routes (must be before general workspace routes)
   app.use('/api/v1/workspaces/:workspaceId/pages', workspacePageRoutes);
+  app.use('/api/v1/workspaces/:workspaceId/invitations', invitationRoutes);
+
+  // General workspace routes
   app.use('/api/v1/workspaces', workspaceRoutes);
-  app.use('/api/v1/pages', pageRoutes);
 
   app.listen(config.port, () => {
     console.log(`API gateway listening on port ${config.port}`);

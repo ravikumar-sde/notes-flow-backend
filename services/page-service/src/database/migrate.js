@@ -1,5 +1,39 @@
+const { Sequelize } = require('sequelize');
+const config = require('../config');
+
+const sequelize = new Sequelize(config.databaseUrl, {
+  dialect: 'postgres',
+  logging: process.env.NODE_ENV !== 'production' ? console.log : false,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
+});
+
+module.exports = sequelize;
+
+const { Umzug, SequelizeStorage } = require('umzug');
+const path = require('path');
 const sequelize = require('./sequelize');
-const umzug = require('./umzug');
+
+const umzug = new Umzug({
+  migrations: {
+    glob: path.join(__dirname, '../migrations/*.js'),
+    resolve: ({ name, path: filepath }) => {
+      const migration = require(filepath);
+      return {
+        name,
+        up: async () => migration.up(sequelize.getQueryInterface(), sequelize.constructor),
+        down: async () => migration.down(sequelize.getQueryInterface(), sequelize.constructor),
+      };
+    },
+  },
+  context: sequelize.getQueryInterface(),
+  storage: new SequelizeStorage({ sequelize }),
+  logger: console,
+});
 
 (async function runMigrations() {
   try {

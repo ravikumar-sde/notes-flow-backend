@@ -1,3 +1,7 @@
+// This file is deprecated. All invitation controller functions have been extracted to separate files.
+// See: createInvitation.js, getWorkspaceInvitations.js, getInvitationByCode.js, acceptInvitation.js, deactivateInvitation.js, deleteInvitation.js
+// This file can be removed once all references are updated.
+
 function createInvitationController(dataAccess, services, businessLogic) {
   async function createInvitation(req, res) {
     const userId = req.headers['x-user-id'];

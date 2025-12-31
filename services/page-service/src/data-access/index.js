@@ -1,6 +1,6 @@
 const db = require('../database');
-const createPageQueries = require('./pageQueries');
-const createWorkspaceMembershipQueries = require('./workspaceMembershipQueries');
+const createPageQueries = require('./page.db');
+const createWorkspaceMembershipQueries = require('./workspaceMembership.db');
 
 const pageQueries = createPageQueries(db);
 const workspaceMembershipQueries = createWorkspaceMembershipQueries(db);

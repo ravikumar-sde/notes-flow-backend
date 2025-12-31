@@ -5,8 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "NODE_ENV=development node src/index.js",
-    "test": "echo \"No tests yet for api-gateway\" && exit 0"
+    "dev": "NODE_ENV=development node src/index.js"
   },
   "keywords": [],
   "author": "",

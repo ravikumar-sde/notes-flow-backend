@@ -1,457 +1,4277 @@
 {
-  "info": {
-    "name": "NotesFlow Backend",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    { "key": "baseUrl", "value": "http://localhost:4000", "type": "string" },
-    { "key": "authToken", "value": "", "type": "string" },
-    { "key": "workspaceId", "value": "", "type": "string" },
-    { "key": "pageId", "value": "", "type": "string" },
-    { "key": "childPageId", "value": "", "type": "string" }
-  ],
-  "item": [
-    {
-      "name": "Health",
-      "item": [
-        {
-          "name": "API Gateway Health",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/health",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "health"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Auth",
-      "item": [
-        {
-          "name": "Register",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"StrongPassword123!\",\n  \"name\": \"First User\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "register"]
-            }
-          }
-        },
-        {
-          "name": "Login",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"StrongPassword123!\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  try {",
-                  "    const data = pm.response.json();",
-                  "    if (data.token) {",
-                  "      pm.collectionVariables.set('authToken', data.token);",
-                  "    }",
-                  "  } catch (e) { }",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Me",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "me"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Workspaces",
-      "item": [
-        {
-          "name": "Create Workspace",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"My First Workspace\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  try {",
-                  "    const data = pm.response.json();",
-                  "    if (data.id) {",
-                  "      pm.collectionVariables.set('workspaceId', data.id);",
-                  "    }",
-                  "  } catch (e) { }",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "List Workspaces",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces"]
-            }
-          }
-        },
-        {
-          "name": "Get Workspace by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Workspace (PUT)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Updated Workspace Name\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Workspace (PATCH)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Partially Updated Name\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
-            }
-          }
-        },
-        {
-          "name": "Delete Workspace",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces", "{{workspaceId}}"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Pages",
-      "item": [
-        {
-          "name": "Create Root Page",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"workspace_id\": \"{{workspaceId}}\",\n  \"title\": \"My First Page\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  try {",
-                  "    const data = pm.response.json();",
-                  "    if (data.page && data.page.id) {",
-                  "      pm.collectionVariables.set('pageId', data.page.id);",
-                  "    }",
-                  "  } catch (e) { }",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Create Child Page",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"workspace_id\": \"{{workspaceId}}\",\n  \"parent_page_id\": \"{{pageId}}\",\n  \"title\": \"Child Page\",\n  \"icon\": \"📝\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is a child page nested under the parent.\",\n        \"properties\": {}\n      }\n    ]\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (pm.response.code === 201) {",
-                  "  try {",
-                  "    const data = pm.response.json();",
-                  "    if (data.page && data.page.id) {",
-                  "      pm.collectionVariables.set('childPageId', data.page.id);",
-                  "    }",
-                  "  } catch (e) { }",
-                  "}"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Get Page by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}"]
-            }
-          }
-        },
-        {
-          "name": "Get Child Pages",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}/children",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}", "children"]
-            }
-          }
-        },
-        {
-          "name": "Get Workspace Pages (Tree)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/workspaces/{{workspaceId}}/pages",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "workspaces", "{{workspaceId}}", "pages"]
-            }
-          }
-        },
-        {
-          "name": "Update Page (PUT)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Page Title\",\n  \"icon\": \"✨\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Updated Heading\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This content has been updated!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"code\",\n        \"content\": \"console.log('Hello, NotesFlow!');\",\n        \"properties\": {\n          \"language\": \"javascript\"\n        }\n      }\n    ]\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Page (PATCH)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Partially Updated Title\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}"]
-            }
-          }
-        },
-        {
-          "name": "Move Page",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"parent_page_id\": null,\n  \"position\": 0\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{childPageId}}/move",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{childPageId}}", "move"]
-            }
-          }
-        },
-        {
-          "name": "Archive Page",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"is_archived\": true\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}/archive",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}", "archive"]
-            }
-          }
-        },
-        {
-          "name": "Unarchive Page",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"is_archived\": false\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}/archive",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}", "archive"]
-            }
-          }
-        },
-        {
-          "name": "Delete Page",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/pages/{{pageId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "pages", "{{pageId}}"]
-            }
-          }
-        }
-      ]
-    }
-  ]
+	"info": {
+		"_postman_id": "cb0d00ee-4171-40a8-a312-5a2fae6a550a",
+		"name": "NotesFlow Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25912104",
+		"_collection_link": "https://dark-station-850015.postman.co/workspace/Notes-Flow-App~8e10ac1f-05e9-40d2-ad01-1055ae459ec0/collection/25912104-cb0d00ee-4171-40a8-a312-5a2fae6a550a?action=share&source=collection_link&creator=25912104"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"item": [
+				{
+					"name": "API Gateway Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"random-user@gmail.com\",\n  \"password\": \"Sony@123\",\n  \"name\": \"Random User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"random-user@gmail.com\",\n  \"password\": \"Sony@123\",\n  \"name\": \"Random User\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/auth/register",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "389"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"185-EI+ov8+6p4QOt+sg5jFjpcK9A00\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:54:02 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzYjIzM2RiMy02YWIxLTQyOGItYjBiNS03OWVmYjhiYTlkMzQiLCJlbWFpbCI6InJhbmRvbS11c2VyQGdtYWlsLmNvbSIsImlhdCI6MTc2NzA3NzY0MiwiZXhwIjoxNzY3MDgxMjQyfQ.atNrGjOpQi7_4g4Jm-mL18lsI58h1fLtw9N_RXnJOxk\",\n    \"user\": {\n        \"id\": \"3b233db3-6ab1-428b-b0b5-79efb8ba9d34\",\n        \"email\": \"random-user@gmail.com\",\n        \"name\": \"Random User\",\n        \"created_at\": \"2025-12-30T06:54:02.222Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"  try {",
+									"    const data = pm.response.json();",
+									"    if (data.token) {",
+									"      pm.collectionVariables.set('authToken', data.token);",
+									"    }",
+									"  } catch (e) { }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"ravikumarsingh9907@gmail.com\",\n  \"password\": \"Ravi@123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Sucess Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"ravikumarsingh9907@gmail.com\",\n  \"password\": \"Ravi@123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "404"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"194-p7ACYo2+9WPwtV0x9mgkOe5Y1Xo\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:53:13 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2NhMDc2OC1kNTJmLTQ5NWYtOWJkNC1iY2VmN2M4YzEwOGUiLCJlbWFpbCI6InJhdmlrdW1hcnNpbmdoOTkwN0BnbWFpbC5jb20iLCJpYXQiOjE3NjcwNzc1OTMsImV4cCI6MTc2NzA4MTE5M30.ivAqI4aXjbw-oSEjkdW8zkbCBho2JkTjlgYfsTNPngQ\",\n    \"user\": {\n        \"id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"email\": \"ravikumarsingh9907@gmail.com\",\n        \"name\": \"Ravi Kumar\",\n        \"created_at\": \"2025-12-25T16:03:07.748Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/auth/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"me"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "170"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"aa-Cm0cHPnzId/QvaNGPCuEfEKbH9I\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:53:31 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"user\": {\n        \"id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"email\": \"ravikumarsingh9907@gmail.com\",\n        \"name\": \"Ravi Kumar\",\n        \"created_at\": \"2025-12-25T16:03:07.748Z\"\n    },\n    \"source\": \"cache\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Workspaces",
+			"item": [
+				{
+					"name": "Create Workspace",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  try {",
+									"    const data = pm.response.json();",
+									"    if (data.id) {",
+									"      pm.collectionVariables.set('workspaceId', data.id);",
+									"    }",
+									"  } catch (e) { }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ravi Kumar's Workspace\",\n  \"description\": \"This is my workspace\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Sucess Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Ravi Kumar's Workspace\",\n  \"description\": \"This is my workspace\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "212"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"d4-w5lAEh4kPhgjzKZvZgJJFU0uZ40\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 05:37:57 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"workspace\": {\n        \"id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"name\": \"Ravi Kumar's Workspace\",\n        \"slug\": \"ravi-kumars-workspace\",\n        \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:37:57.089Z\"\n    }\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n//   \"name\": \"Ravi Kumar's Workspace\",\n  \"description\": \"This is my workspace\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "40"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"28-ZvUGgONKBvlJTWdySGwTYocCFxA\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:57:56 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Workspace name is required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List Workspaces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "893"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"37d-Xj9+b34C3VddvrHGh2dwg5g5vfU\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:58:22 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"workspaces\": [\n        {\n            \"id\": \"4e3f33c7-938d-4a72-9950-6bb0e8a6b325\",\n            \"name\": \"First Workspace Updated\",\n            \"slug\": \"first-workspace-updated\",\n            \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"created_at\": \"2025-12-26T11:56:07.057Z\",\n            \"role\": \"owner\"\n        },\n        {\n            \"id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n            \"name\": \"Ravi Kumar's Workspace\",\n            \"slug\": \"ravi-kumars-workspace\",\n            \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"created_at\": \"2025-12-30T05:37:57.089Z\",\n            \"role\": \"owner\"\n        },\n        {\n            \"id\": \"a479f81d-bbed-46a8-98d7-8d875bfa8b92\",\n            \"name\": \"Ravi Kumar's Workspace\",\n            \"slug\": \"ravi-kumars-workspace-1\",\n            \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"created_at\": \"2025-12-30T06:57:41.124Z\",\n            \"role\": \"owner\"\n        },\n        {\n            \"id\": \"38529caf-384e-4999-8df2-bbb743835a9c\",\n            \"name\": \"Ravi Kumar's Workspace\",\n            \"slug\": \"ravi-kumars-workspace-2\",\n            \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"created_at\": \"2025-12-30T06:57:43.617Z\",\n            \"role\": \"owner\"\n        }\n    ],\n    \"source\": \"db\"\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "42"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2a-iFsJpqmI6j4cVwQiO6Ty2gZ3ejY\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:58:42 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Missing Authorization header\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Workspace by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9c"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "229"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"e5-LYpJCni4DhFxbbr/jqg5kUU+2a4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:59:21 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"workspace\": {\n        \"id\": \"38529caf-384e-4999-8df2-bbb743835a9c\",\n        \"name\": \"Ravi Kumar's Workspace\",\n        \"slug\": \"ravi-kumars-workspace-2\",\n        \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T06:57:43.617Z\",\n        \"role\": \"owner\"\n    }\n}"
+						},
+						{
+							"name": "Error Resonse",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "50"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"32-hi2WH3J5/yo46AzVR4Lyud+HiHA\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:02:06 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Workspace not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Workspace (PUT)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Workspace Name\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Workspace Name\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9c"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "229"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"e5-LYpJCni4DhFxbbr/jqg5kUU+2a4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:02:47 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"workspace\": {\n        \"id\": \"38529caf-384e-4999-8df2-bbb743835a9c\",\n        \"name\": \"Ravi Kumar's Workspace\",\n        \"slug\": \"ravi-kumars-workspace-2\",\n        \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T06:57:43.617Z\",\n        \"role\": \"owner\"\n    }\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Workspace Name\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "50"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"32-hi2WH3J5/yo46AzVR4Lyud+HiHA\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:03:15 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Workspace not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Workspace (PATCH)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Partially Updated Name dddddddd\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Partially Updated Name dddddddd\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9c"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "229"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"e5-LYpJCni4DhFxbbr/jqg5kUU+2a4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:03:48 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"workspace\": {\n        \"id\": \"38529caf-384e-4999-8df2-bbb743835a9c\",\n        \"name\": \"Ravi Kumar's Workspace\",\n        \"slug\": \"ravi-kumars-workspace-2\",\n        \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T06:57:43.617Z\",\n        \"role\": \"owner\"\n    }\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Partially Updated Name dddddddd\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "50"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"32-hi2WH3J5/yo46AzVR4Lyud+HiHA\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:04:34 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Workspace not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Workspace",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "38529caf-384e-4999-8df2-bbb743835a9c"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9d"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "50"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"32-hi2WH3J5/yo46AzVR4Lyud+HiHA\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:05:01 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Workspace not found or access denied\"\n}"
+						},
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "38529caf-384e-4999-8df2-bbb743835a9c"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "229"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"e5-LYpJCni4DhFxbbr/jqg5kUU+2a4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:05:16 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"workspace\": {\n        \"id\": \"38529caf-384e-4999-8df2-bbb743835a9c\",\n        \"name\": \"Ravi Kumar's Workspace\",\n        \"slug\": \"ravi-kumars-workspace-2\",\n        \"owner_id\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T06:57:43.617Z\",\n        \"role\": \"owner\"\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Invitations",
+			"item": [
+				{
+					"name": "Create Invitation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  try {",
+									"    const data = pm.response.json();",
+									"    if (data.invitation) {",
+									"      pm.collectionVariables.set('inviteCode', data.invitation.invite_code);",
+									"      pm.collectionVariables.set('invitationId', data.invitation.id);",
+									"    }",
+									"  } catch (e) { }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"member\",\n  \"expiresInDays\": 7,\n  \"maxUses\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"invitations"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Sucess Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"role\": \"member\",\n  \"expiresInDays\": 7,\n  \"maxUses\": 10\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"invitations"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										}
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "379"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"17b-XeeIjVeHCouY/6+NnnhkucZNCEo\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:23:07 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"invitation\": {\n        \"id\": \"0c78bf5c-3594-416f-808e-8e9600dc5b53\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"invite_code\": \"LM95-QQJS-8CME\",\n        \"role\": \"member\",\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"expires_at\": \"2026-01-06T06:23:07.329Z\",\n        \"max_uses\": 10,\n        \"uses_count\": 0,\n        \"is_active\": true,\n        \"created_at\": \"2025-12-30T06:23:07.329Z\",\n        \"updated_at\": \"2025-12-30T06:23:07.329Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Workspace Invitations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"invitations"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"invitations"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "382"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"17e-N/8CabN0jxsUHb7tHQToOrSyzrk\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:24:33 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"invitations\": [\n        {\n            \"id\": \"0c78bf5c-3594-416f-808e-8e9600dc5b53\",\n            \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n            \"invite_code\": \"LM95-QQJS-8CME\",\n            \"role\": \"member\",\n            \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"expires_at\": \"2026-01-06T06:23:07.329Z\",\n            \"max_uses\": 10,\n            \"uses_count\": 0,\n            \"is_active\": true,\n            \"created_at\": \"2025-12-30T06:23:07.329Z\",\n            \"updated_at\": \"2025-12-30T06:23:07.329Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Invitation by Code (Preview)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"member\",\n  \"expiresInDays\": 7,\n  \"maxUses\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/invitations/:inviteCode",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"invitations",
+								":inviteCode"
+							],
+							"variable": [
+								{
+									"key": "inviteCode",
+									"value": "LM95-QQJS-8CME"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"role\": \"member\",\n  \"expiresInDays\": 7,\n  \"maxUses\": 10\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/invitations/:inviteCode",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"invitations",
+										":inviteCode"
+									],
+									"variable": [
+										{
+											"key": "inviteCode",
+											"value": "LM95-QQJS-8CME"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "225"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"e1-npUly+Qm0rpJTgr/Ihmhbpf2jd0\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:44:10 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"invitation\": {\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"workspace_name\": \"Ravi Kumar's Workspace\",\n        \"workspace_slug\": \"ravi-kumars-workspace\",\n        \"role\": \"member\",\n        \"expires_at\": \"2026-01-06T06:23:07.329Z\",\n        \"is_valid\": true\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Accept Invitation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/invitations/:inviteCode/accept",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"invitations",
+								":inviteCode",
+								"accept"
+							],
+							"variable": [
+								{
+									"key": "inviteCode",
+									"value": "LM95-QQJS-8CME"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate Invitation",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations/:invitationId/deactivate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"invitations",
+								":invitationId",
+								"deactivate"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "invitationId",
+									"value": "0c78bf5c-3594-416f-808e-8e9600dc5b53"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations/:invitationId/deactivate",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"invitations",
+										":invitationId",
+										"deactivate"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "invitationId",
+											"value": "0c78bf5c-3594-416f-808e-8e9600dc5b53"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "380"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"17c-sxP/DRRe8dpqPKSYeXu4lXpveg4\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:54:33 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"invitation\": {\n        \"id\": \"0c78bf5c-3594-416f-808e-8e9600dc5b53\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"invite_code\": \"LM95-QQJS-8CME\",\n        \"role\": \"member\",\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"expires_at\": \"2026-01-06T06:23:07.329Z\",\n        \"max_uses\": 10,\n        \"uses_count\": 1,\n        \"is_active\": false,\n        \"created_at\": \"2025-12-30T06:23:07.329Z\",\n        \"updated_at\": \"2025-12-30T06:54:33.696Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Invitation",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/invitations/:invitationId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"invitations",
+								":invitationId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "invitationId",
+									"value": "0c78bf5c-3594-416f-808e-8e9600dc5b53"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Pages",
+			"item": [
+				{
+					"name": "Create Root Page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  try {",
+									"    const data = pm.response.json();",
+									"    if (data.page && data.page.id) {",
+									"      pm.collectionVariables.set('pageId', data.page.id);",
+									"    }",
+									"  } catch (e) { }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Welcome to my page\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ad"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Welcome to my page\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "775"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"307-IcvecUYVHYSjDpGRjOplAdrO3yM\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 05:38:42 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": null,\n        \"title\": \"Welcome to my page\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:38:42.004Z\",\n        \"updated_at\": \"2025-12-30T05:38:42.004Z\"\n    }\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Welcome to my page\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ad"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2d-g3GwYmsZfPvAuwPaj2T0OX3BHAI\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:06:50 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Access denied to this workspace\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Page By ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  try {",
+									"    const data = pm.response.json();",
+									"    if (data.page && data.page.id) {",
+									"      pm.collectionVariables.set('childPageId', data.page.id);",
+									"    }",
+									"  } catch (e) { }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:worksapceId/pages/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":worksapceId",
+								"pages",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "worksapceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "id",
+									"value": "3431f935-3c48-4388-9e61-38aea6c723c9"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:worksapceId/pages/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":worksapceId",
+										"pages",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "worksapceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "3431f935-3c48-4388-9e61-38aea6c723c7"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "804"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"324-AeYTmHConBdmevPtyonpbdfksUQ\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 05:41:11 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": null,\n        \"title\": \"Welcome to my page\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:38:42.004Z\",\n        \"updated_at\": \"2025-12-30T05:38:42.007Z\",\n        \"role\": \"owner\"\n    },\n    \"source\": \"db\"\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:worksapceId/pages/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":worksapceId",
+										"pages",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "worksapceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "3431f935-3c48-4388-9e61-38aea6c723c9"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2d-EAnq1qCw7lL5e5fSk7mZPMg3tI0\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:10:50 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Page not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Child Pages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:worksapceId/pages/:id/children",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":worksapceId",
+								"pages",
+								":id",
+								"children"
+							],
+							"variable": [
+								{
+									"key": "worksapceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "id",
+									"value": "3431f935-3c48-4388-9e61-38aea6c723c8"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:worksapceId/pages/:id/children",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":worksapceId",
+										"pages",
+										":id",
+										"children"
+									],
+									"variable": [
+										{
+											"key": "worksapceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "3431f935-3c48-4388-9e61-38aea6c723c7"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "519"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"207-H3EDG5c22pLRN4lIsWaP8E9tHIU\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 05:59:57 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"pages\": [\n        {\n            \"id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e3\",\n            \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n            \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n            \"title\": \"Welcome to my page\",\n            \"icon\": \"📄\",\n            \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n            \"is_archived\": false,\n            \"position\": 0,\n            \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"created_at\": \"2025-12-30T05:59:42.634Z\",\n            \"updated_at\": \"2025-12-30T05:59:42.637Z\"\n        }\n    ],\n    \"source\": \"db\"\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:worksapceId/pages/:id/children",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":worksapceId",
+										"pages",
+										":id",
+										"children"
+									],
+									"variable": [
+										{
+											"key": "worksapceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "3431f935-3c48-4388-9e61-38aea6c723c8"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2d-EAnq1qCw7lL5e5fSk7mZPMg3tI0\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:16:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Page not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Workspace Pages (Tree)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ad"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1006"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"3ee-xWKPxBUbYu6y2/0ilfe9bzEuZTs\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:02:57 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"pages\": [\n        {\n            \"id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n            \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n            \"parent_page_id\": null,\n            \"title\": \"Welcome to my page\",\n            \"icon\": \"📄\",\n            \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n            \"is_archived\": false,\n            \"position\": 0,\n            \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n            \"created_at\": \"2025-12-30T05:38:42.004Z\",\n            \"updated_at\": \"2025-12-30T05:38:42.007Z\",\n            \"children\": [\n                {\n                    \"id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e3\",\n                    \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n                    \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n                    \"title\": \"Welcome to my page\",\n                    \"icon\": \"📄\",\n                    \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n                    \"is_archived\": false,\n                    \"position\": 0,\n                    \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n                    \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n                    \"created_at\": \"2025-12-30T05:59:42.634Z\",\n                    \"updated_at\": \"2025-12-30T05:59:42.637Z\",\n                    \"children\": []\n                }\n            ]\n        }\n    ],\n    \"source\": \"db\"\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ad"
+										}
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2d-g3GwYmsZfPvAuwPaj2T0OX3BHAI\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:16:54 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Access denied to this workspace\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Page (PUT)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Page Title\",\n  \"icon\": \"✨\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Updated Heading\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This content has been updated!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"code\",\n        \"content\": \"console.log('Hello, NotesFlow!');\",\n        \"properties\": {\n          \"language\": \"javascript\"\n        }\n      }\n    ]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "id",
+									"value": "3431f935-3c48-4388-9e61-38aea6c723c7"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Updated Page Title\",\n  \"icon\": \"✨\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Updated Heading\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This content has been updated!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"code\",\n        \"content\": \"console.log('Hello, NotesFlow!');\",\n        \"properties\": {\n          \"language\": \"javascript\"\n        }\n      }\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "3431f935-3c48-4388-9e61-38aea6c723c7"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "789"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"315-Aygcs4G1zofvO+mkZ8qRBF5eAkU\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:03:58 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": null,\n        \"title\": \"Updated Page Title\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Updated Heading\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This content has been updated!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"code\",\n                    \"content\": \"console.log('Hello, NotesFlow!');\",\n                    \"properties\": {\n                        \"language\": \"javascript\"\n                    }\n                }\n            ]\n        },\n        \"icon\": \"✨\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:38:42.004Z\",\n        \"updated_at\": \"2025-12-30T06:03:58.367Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Page (PATCH)",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Partially Updated Child Page Title\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "id",
+									"value": "4fbb3dfc-8e66-49da-a36f-4fadd544b0e3"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Partially Updated Child Page Title\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "4fbb3dfc-8e66-49da-a36f-4fadd544b0e3"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "825"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"339-kbLKJi3G0LMXBwjG9O8vOb5l918\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:05:02 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e3\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"title\": \"Partially Updated Child Page Title\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:59:42.634Z\",\n        \"updated_at\": \"2025-12-30T06:05:02.554Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Move Page",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c8\",\n  \"position\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id/move",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages",
+								":id",
+								"move"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "id",
+									"value": "559f071a-27d2-4904-a9df-b61979d2ee83"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n  \"position\": 0\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id/move",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":id",
+										"move"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "559f071a-27d2-4904-a9df-b61979d2ee83"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "811"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"32b-pqQKLiwWovVEXZIMMCdoBS3NNtc\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:10:35 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"559f071a-27d2-4904-a9df-b61979d2ee83\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"title\": \"Welcome to my page 3\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T06:07:18.272Z\",\n        \"updated_at\": \"2025-12-30T06:10:35.484Z\"\n    }\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c8\",\n  \"position\": 0\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id/move",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":id",
+										"move"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "559f071a-27d2-4904-a9df-b61979d2ee83"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2d-EAnq1qCw7lL5e5fSk7mZPMg3tI0\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:18:50 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Page not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Archive Page",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"is_archived\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:pageId/archive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages",
+								":pageId",
+								"archive"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "pageId",
+									"value": "4fbb3dfc-8e66-49da-a36f-4fadd544b0e3"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"is_archived\": true\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:pageId/archive",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":pageId",
+										"archive"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "pageId",
+											"value": "4fbb3dfc-8e66-49da-a36f-4fadd544b0e3"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "824"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"338-XEl4jowZcugB4fFLSEUeki9Ju7c\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:20:10 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e3\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"title\": \"Partially Updated Child Page Title\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": true,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:59:42.634Z\",\n        \"updated_at\": \"2025-12-30T07:20:10.194Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Unarchive Page",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"is_archived\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:pageId/archive",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages",
+								":pageId",
+								"archive"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "pageId",
+									"value": "4fbb3dfc-8e66-49da-a36f-4fadd544b0e3"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"is_archived\": false\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:pageId/archive",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":pageId",
+										"archive"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "pageId",
+											"value": "4fbb3dfc-8e66-49da-a36f-4fadd544b0e3"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "825"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"339-H5+sdT26gX8WtXEUrDYv6AP6NBU\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:21:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e3\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": \"3431f935-3c48-4388-9e61-38aea6c723c7\",\n        \"title\": \"Partially Updated Child Page Title\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T05:59:42.634Z\",\n        \"updated_at\": \"2025-12-30T07:21:24.431Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Page",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								},
+								{
+									"key": "id",
+									"value": "559f071a-27d2-4904-a9df-b61979d2ee85"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "559f071a-27d2-4904-a9df-b61979d2ee83"
+										}
+									]
+								}
+							},
+							"status": "No Content",
+							"code": 204,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"0-2jmj7l5rSw0yVb/vlWAYkK/YBwk\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:11:42 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										},
+										{
+											"key": "id",
+											"value": "559f071a-27d2-4904-a9df-b61979d2ee85"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "45"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2d-EAnq1qCw7lL5e5fSk7mZPMg3tI0\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:22:04 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Page not found or access denied\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Child Page",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"  try {",
+									"    const data = pm.response.json();",
+									"    if (data.page && data.page.id) {",
+									"      pm.collectionVariables.set('pageId', data.page.id);",
+									"    }",
+									"  } catch (e) { }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Welcome to my page 3\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"parent_page_id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e4\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workspaces",
+								":workspaceId",
+								"pages"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Success Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Welcome to my page 3\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"parent_page_id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e3\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										}
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "811"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"32b-6G/3NtrVQqdtDOHPTn/+fGkidCM\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 06:07:18 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"page\": {\n        \"id\": \"559f071a-27d2-4904-a9df-b61979d2ee83\",\n        \"workspace_id\": \"df56702e-cd39-4597-bb94-804087dfb6ac\",\n        \"parent_page_id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e4\",\n        \"title\": \"Welcome to my page 3\",\n        \"content\": {\n            \"blocks\": [\n                {\n                    \"id\": \"block-1\",\n                    \"type\": \"heading\",\n                    \"level\": 1,\n                    \"content\": \"Welcome to my page\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-2\",\n                    \"type\": \"paragraph\",\n                    \"content\": \"This is my first page in NotesFlow!\",\n                    \"properties\": {}\n                },\n                {\n                    \"id\": \"block-3\",\n                    \"type\": \"todo\",\n                    \"content\": \"Complete the setup\",\n                    \"properties\": {\n                        \"checked\": false\n                    }\n                }\n            ]\n        },\n        \"icon\": \"📄\",\n        \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n        \"is_archived\": false,\n        \"position\": 0,\n        \"created_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"last_edited_by\": \"dcca0768-d52f-495f-9bd4-bcef7c8c108e\",\n        \"created_at\": \"2025-12-30T06:07:18.272Z\",\n        \"updated_at\": \"2025-12-30T06:07:18.272Z\"\n    }\n}"
+						},
+						{
+							"name": "Error Response",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Welcome to my page 3\",\n  \"icon\": \"📄\",\n  \"cover_image\": \"https://images.unsplash.com/photo-1557683316-973673baf926\",\n  \"parent_page_id\": \"4fbb3dfc-8e66-49da-a36f-4fadd544b0e4\",\n  \"content\": {\n    \"blocks\": [\n      {\n        \"id\": \"block-1\",\n        \"type\": \"heading\",\n        \"content\": \"Welcome to my page\",\n        \"level\": 1,\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-2\",\n        \"type\": \"paragraph\",\n        \"content\": \"This is my first page in NotesFlow!\",\n        \"properties\": {}\n      },\n      {\n        \"id\": \"block-3\",\n        \"type\": \"todo\",\n        \"content\": \"Complete the setup\",\n        \"properties\": {\n          \"checked\": false\n        }\n      }\n    ]\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/api/v1/workspaces/:workspaceId/pages",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"workspaces",
+										":workspaceId",
+										"pages"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "df56702e-cd39-4597-bb94-804087dfb6ac"
+										}
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Access-Control-Expose-Headers",
+									"value": "Content-Type,Authorization"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "35"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"23-dpOa2yPdHd3KDU6diizTQuHtCV8\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 30 Dec 2025 07:07:36 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Parent page not found\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:4000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workspaceId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pageId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "childPageId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "inviteCode",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "invitationId",
+			"value": "",
+			"type": "string"
+		}
+	]
 }
-
