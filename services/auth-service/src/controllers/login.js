@@ -2,11 +2,25 @@ const bcrypt = require('bcryptjs');
 
 module.exports = function makeLogin({ db, redisClient, natsClient, config, signToken }) {
   return async function login(req, res) {
-    const { email, password } = req.body || {};
+    const Joi = require('joi');
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+    const schema = Joi.object({
+      body: Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().required()
+      })
+    });
+
+    const { error, value } = schema.validate({ body: req.body }, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
+
+    const { email, password } = value.body;
 
     try {
       const result = await db.query(

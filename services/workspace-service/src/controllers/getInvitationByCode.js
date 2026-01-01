@@ -1,13 +1,19 @@
-module.exports = function makeGetInvitationByCode({ dataAccess, services, businessLogic }) {
+module.exports = function makeGetInvitationByCode({ dataAccess, services, businessLogic, Joi }) {
   return async function getInvitationByCode(req, res) {
-    const { inviteCode } = req.params;
+    const validationResult = ValidateInput({
+      inviteCode: req.params.inviteCode
+    });
 
-    if (!inviteCode) {
-      return res.status(400).json({ message: 'Invite code is required' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
 
+    const { inviteCode } = validationResult.value;
+
     try {
-      // Normalize the code
       const normalizedCode = businessLogic.normalizeInviteCode(inviteCode);
       
       if (!businessLogic.isValidInviteCodeFormat(normalizedCode)) {
@@ -40,5 +46,13 @@ module.exports = function makeGetInvitationByCode({ dataAccess, services, busine
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ inviteCode }) {
+    const schema = Joi.object({
+      inviteCode: Joi.string().required()
+    });
+
+    return schema.validate({ inviteCode }, { abortEarly: false });
+  }
 };
 

@@ -1,11 +1,19 @@
-module.exports = function makeDeactivateInvitation({ dataAccess, services, businessLogic }) {
+module.exports = function makeDeactivateInvitation({ dataAccess, services, businessLogic, Joi }) {
   return async function deactivateInvitation(req, res) {
-    const userId = req.headers['x-user-id'];
-    const { workspaceId, invitationId } = req.params;
+    const validationResult = ValidateInput({
+      userId: req.headers['x-user-id'],
+      workspaceId: req.params.workspaceId,
+      invitationId: req.params.invitationId
+    });
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
+
+    const { userId, workspaceId, invitationId } = validationResult.value;
 
     try {
       // Check if user has permission to deactivate invitations
@@ -36,5 +44,15 @@ module.exports = function makeDeactivateInvitation({ dataAccess, services, busin
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ userId, workspaceId, invitationId }) {
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required(),
+      workspaceId: Joi.string().uuid().required(),
+      invitationId: Joi.string().uuid().required()
+    });
+
+    return schema.validate({ userId, workspaceId, invitationId }, { abortEarly: false });
+  }
 };
 

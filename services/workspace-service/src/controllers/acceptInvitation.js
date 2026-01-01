@@ -1,18 +1,20 @@
-module.exports = function makeAcceptInvitation({ dataAccess, services, businessLogic }) {
+module.exports = function makeAcceptInvitation({ dataAccess, services, businessLogic, Joi }) {
   return async function acceptInvitation(req, res) {
-    const userId = req.headers['x-user-id'];
-    const { inviteCode } = req.params;
+    const validationResult = ValidateInput({
+      userId: req.headers['x-user-id'],
+      inviteCode: req.params.inviteCode
+    });
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
 
-    if (!inviteCode) {
-      return res.status(400).json({ message: 'Invite code is required' });
-    }
+    const { userId, inviteCode } = validationResult.value;
 
     try {
-      // Normalize the code
       const normalizedCode = businessLogic.normalizeInviteCode(inviteCode);
 
       if (!businessLogic.isValidInviteCodeFormat(normalizedCode)) {
@@ -73,5 +75,14 @@ module.exports = function makeAcceptInvitation({ dataAccess, services, businessL
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ userId, inviteCode }) {
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required(),
+      inviteCode: Joi.string().required()
+    });
+
+    return schema.validate({ userId, inviteCode }, { abortEarly: false });
+  }
 };
 

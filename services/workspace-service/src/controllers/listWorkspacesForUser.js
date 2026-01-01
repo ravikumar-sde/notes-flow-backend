@@ -1,16 +1,21 @@
-module.exports = function makeListWorkspacesForUser({ dataAccess, services, businessLogic }) {
+module.exports = function makeListWorkspacesForUser({ dataAccess, services, businessLogic, Joi }) {
   return async function listWorkspacesForUser(req, res) {
-    const userId = req.headers['x-user-id'];
+    const validationResult = ValidateInput({
+      userId: req.headers['x-user-id']
+    });
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
+
+    const { userId } = validationResult.value;
 
     try {
       const cached = await services.getCachedWorkspaces(userId);
-      if (cached) {
-        return res.json({ workspaces: cached, source: 'cache' });
-      }
+      if (cached) return res.json({ workspaces: cached, source: 'cache' });
 
       const workspaces = await dataAccess.getWorkspacesForUser(userId);
       await services.setCachedWorkspaces(userId, workspaces);
@@ -21,5 +26,13 @@ module.exports = function makeListWorkspacesForUser({ dataAccess, services, busi
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ userId }) {
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required()
+    });
+
+    return schema.validate({ userId }, { abortEarly: false });
+  }
 };
 

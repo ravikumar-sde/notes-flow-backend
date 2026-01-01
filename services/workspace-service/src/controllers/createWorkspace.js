@@ -1,15 +1,18 @@
-module.exports = function makeCreateWorkspace({ dataAccess, services, businessLogic }) {
+module.exports = function makeCreateWorkspace({ dataAccess, services, businessLogic, Joi }) {
   return async function createWorkspace(req, res) {
-    const userId = req.headers['x-user-id'];
-    const { name } = req.body || {};
+    const validationResult = ValidateInput({
+      userId: req.headers['x-user-id'],
+      name: req.body.name
+    });
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
 
-    if (!name) {
-      return res.status(400).json({ message: 'Workspace name is required' });
-    }
+    const { userId, name } = validationResult.value;
 
     try {
       const slug = await businessLogic.generateUniqueSlug(name);
@@ -24,5 +27,14 @@ module.exports = function makeCreateWorkspace({ dataAccess, services, businessLo
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ userId, name }) {
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required(),
+      name: Joi.string().min(1).max(100).required()
+    });
+
+    return schema.validate({ userId, name }, { abortEarly: false });
+  }
 };
 

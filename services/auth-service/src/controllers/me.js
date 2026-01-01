@@ -1,33 +1,34 @@
 module.exports = function makeMe({ db, redisClient, natsClient, config, signToken }) {
   return async function me(req, res) {
-    const userId = req.userId;
-    if (!userId) {
+    const Joi = require('joi');
+
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required()
+    });
+
+    const { error, value } = schema.validate({ userId: req.userId }, { abortEarly: false });
+
+    if (error) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
+
+    const userId = value.userId;
 
     try {
       const redis = redisClient.getRedisClient();
       const cacheKey = `user:${userId}`;
       const cached = await redis.get(cacheKey);
-      if (cached) {
-        return res.json({ user: JSON.parse(cached), source: 'cache' });
-      }
+      if (cached) return res.json({ user: JSON.parse(cached), source: 'cache' });
 
       const result = await db.query(
         'SELECT id, email, name, created_at FROM users WHERE id = $1',
         [userId]
       );
 
-      if (result.rowCount === 0) {
-        return res.status(404).json({ message: 'User not found' });
-      }
+      if (result.rowCount === 0) return res.status(404).json({ message: 'User not found' });
 
       const user = result.rows[0];
-      await redis.setex(
-        cacheKey,
-        config.userCacheTtlSeconds,
-        JSON.stringify(user)
-      );
+      await redis.setex(cacheKey, config.userCacheTtlSeconds, JSON.stringify(user));
 
       return res.json({ user, source: 'db' });
     } catch (err) {

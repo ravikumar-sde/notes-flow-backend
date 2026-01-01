@@ -2,11 +2,26 @@ const bcrypt = require('bcryptjs');
 
 module.exports = function makeRegister({ db, redisClient, natsClient, config, signToken }) {
   return async function register(req, res) {
-    const { email, password, name } = req.body || {};
+    const Joi = require('joi');
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+    const schema = Joi.object({
+      body: Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(8).max(100).required(),
+        name: Joi.string().max(100)
+      })
+    });
+
+    const { error, value } = schema.validate({ body: req.body }, { abortEarly: false });
+
+    if (error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
+
+    const { email, password, name } = value.body;
 
     try {
       const existing = await db.query('SELECT id FROM users WHERE email = $1', [

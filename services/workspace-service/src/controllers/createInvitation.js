@@ -1,16 +1,21 @@
-module.exports = function makeCreateInvitation({ dataAccess, services, businessLogic }) {
+module.exports = function makeCreateInvitation({ dataAccess, services, businessLogic, Joi }) {
   return async function createInvitation(req, res) {
-    const userId = req.headers['x-user-id'];
-    const { workspaceId } = req.params;
-    const { role, expiresInDays, maxUses } = req.body || {};
+    const validationResult = ValidateInput({
+      userId: req.headers['x-user-id'],
+      workspaceId: req.params.workspaceId,
+      role: req.body.role,
+      expiresInDays: req.body.expiresInDays,
+      maxUses: req.body.maxUses
+    });
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
 
-    if (!workspaceId) {
-      return res.status(400).json({ message: 'Workspace ID is required' });
-    }
+    const { userId, workspaceId, role, expiresInDays, maxUses } = validationResult.value;
 
     try {
       // Check if user has permission to create invitations
@@ -74,5 +79,17 @@ module.exports = function makeCreateInvitation({ dataAccess, services, businessL
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ userId, workspaceId, role, expiresInDays, maxUses }) {
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required(),
+      workspaceId: Joi.string().uuid().required(),
+      role: Joi.string().valid('owner', 'admin', 'member', 'viewer').default('member'),
+      expiresInDays: Joi.number().integer().min(1).max(365),
+      maxUses: Joi.number().integer().min(1)
+    });
+
+    return schema.validate({ userId, workspaceId, role, expiresInDays, maxUses }, { abortEarly: false });
+  }
 };
 

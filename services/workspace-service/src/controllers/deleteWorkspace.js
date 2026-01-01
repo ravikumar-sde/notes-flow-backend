@@ -1,31 +1,28 @@
-module.exports = function makeDeleteWorkspace({ dataAccess, services, businessLogic }) {
+module.exports = function makeDeleteWorkspace({ dataAccess, services, businessLogic, Joi }) {
   return async function deleteWorkspace(req, res) {
-    const userId = req.headers['x-user-id'];
-    const { id } = req.params;
+    const validationResult = ValidateInput({
+      userId: req.headers['x-user-id'],
+      id: req.params.id
+    });
 
-    if (!userId) {
-      return res.status(401).json({ message: 'Missing x-user-id header' });
+    if (validationResult.error) {
+      return res.status(400).json({
+        message: 'Validation error',
+        details: validationResult.error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+      });
     }
 
-    if (!id) {
-      return res.status(400).json({ message: 'Workspace ID is required' });
-    }
+    const { userId, id } = validationResult.value;
 
     try {
       const ownerData = await dataAccess.getWorkspaceOwner(id);
+      if (!ownerData) return res.status(404).json({ message: 'Workspace not found' });
 
-      if (!ownerData) {
-        return res.status(404).json({ message: 'Workspace not found' });
-      }
-
-      // Only the owner can delete the workspace
       if (ownerData.owner_id !== userId) {
         return res.status(403).json({ message: 'Only the workspace owner can delete the workspace' });
       }
 
-      // Get all members before deletion for cache invalidation
       const members = await dataAccess.getWorkspaceMembers(id);
-
       await dataAccess.deleteWorkspace(id);
 
       const memberUserIds = members.map(m => m.user_id);
@@ -38,5 +35,14 @@ module.exports = function makeDeleteWorkspace({ dataAccess, services, businessLo
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+
+  function ValidateInput({ userId, id }) {
+    const schema = Joi.object({
+      userId: Joi.string().uuid().required(),
+      id: Joi.string().uuid().required()
+    });
+
+    return schema.validate({ userId, id }, { abortEarly: false });
+  }
 };
 
